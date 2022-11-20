@@ -1,46 +1,41 @@
-#include <limits.h>
-#include <unistd.h>
 #include "main.h"
+
 /**
- *_printf - takes in a string and prints different types of arguments for
- * an unspecified amount of arguments
- * @format: the initial string that tell us what is going to be printed
- * Return: the amount of times we write to stdout
+ * get_precision - Calculates the precision for printing
+ * @format: Formatted string in which to print the arguments
+ * @i: List of arguments to be printed.
+ * @list: list of arguments.
+ *
+ * Return: Precision.
  */
-int _printf(const char *format, ...)
+int get_precision(const char *format, int *i, va_list list)
 {
-	int i, count;
+	int curr_i = *i + 1;
+	int precision = -1;
 
-	int (*f)(va_list);
+	if (format[curr_i] != '.')
+		return (precision);
 
-	va_list list;
+	precision = 0;
 
-	if (format == NULL)
-		return (-1);
-
-	va_start(list, format);
-	i = count = 0;
-
-	while (format[i] != '\0')
+	for (curr_i += 1; format[curr_i] != '\0'; curr_i++)
 	{
-		if (format[i] == '%')
+		if (is_digit(format[curr_i]))
 		{
-			if (format[i + 1] == '\0')
-				return (-1);
-			f = get_func(format[i + 1]);
-			if (f == NULL)
-				count += print_nan(format[i], format[i + 1]);
-			else
-				count += f(list);
-			i++;
+			precision *= 10;
+			precision += format[curr_i] - '0';
+		}
+		else if (format[curr_i] == '*')
+		{
+			curr_i++;
+			precision = va_arg(list, int);
+			break;
 		}
 		else
-		{
-			_putchar(format[i]);
-			count++;
-		}
-		i++;
+			break;
 	}
-	va_end(list);
-	return (count);
+
+	*i = curr_i - 1;
+
+	return (precision);
 }
